@@ -3,6 +3,7 @@ import React, { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTasksGrid } from "../hooks/useTasksGrid";
 import { useTaskView } from "../hooks/useTaskView";
+import GridHeader from "./GridHeader";
 import TasksFilter from "./TasksFilter";
 import TaskView from "./TaskView";
 import TaskEditForm from "./TaskEditForm";
@@ -12,7 +13,8 @@ export default function TasksGrid({ filter }) {
   const navigate = useNavigate();
   const { tasks, loading, error } = useTasksGrid(filter);
   const { selectedTask, isViewOpen, openTaskView, closeTaskView } = useTaskView();
-  const [filters, setFilters] = useState({ search: "", priority: "", status: "" });
+  const [searchValue, setSearchValue] = useState("");
+  const [filters, setFilters] = useState({ priority: [], status: [] });
   const [editTask, setEditTask] = useState(null);
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
@@ -20,14 +22,14 @@ export default function TasksGrid({ filter }) {
   // Local filtering
   const filteredTasks = useMemo(() => {
     return tasks.filter((task) => {
-      const searchMatch = !filters.search || 
-        (task.title || "").toLowerCase().includes(filters.search.toLowerCase()) ||
-        (task.assignee?.name || task.assignee || "").toLowerCase().includes(filters.search.toLowerCase());
-      const priorityMatch = !filters.priority || String(task.priority || 3) === String(filters.priority);
-      const statusMatch = !filters.status || String(task.status) === String(filters.status);
+      const searchMatch = !searchValue || 
+        (task.title || "").toLowerCase().includes(searchValue.toLowerCase()) ||
+        (task.assignee?.name || task.assignee || "").toLowerCase().includes(searchValue.toLowerCase());
+      const priorityMatch = !filters.priority || filters.priority.length === 0 || filters.priority.includes(String(task.priority || 3));
+      const statusMatch = !filters.status || filters.status.length === 0 || filters.status.includes(String(task.status));
       return searchMatch && priorityMatch && statusMatch;
     });
-  }, [tasks, filters]);
+  }, [tasks, searchValue, filters]);
 
   if (loading) {
     return (
@@ -46,31 +48,19 @@ export default function TasksGrid({ filter }) {
   }
 
   return (
-    <div className="overflow-hidden rounded-xl bg-white shadow-lg">
-      {/* Header */}
-      <div className="border-b border-gray-200 px-6 py-4 flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-gray-800">Tasks</h2>
-        <div className="flex gap-3">
-          <button
-            onClick={() => navigate('/tasks/canvas')}
-            className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white rounded-lg border border-gray-300 hover:bg-gray-50"
-          >
-            <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 5a1 1 0 011-1h4a1 1 0 011 1v7a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM14 5a1 1 0 011-1h4a1 1 0 011 1v7a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM4 16a1 1 0 011-1h4a1 1 0 011 1v3a1 1 0 01-1 1H5a1 1 0 01-1-1v-3zM14 16a1 1 0 011-1h4a1 1 0 011 1v3a1 1 0 01-1 1h-4a1 1 0 01-1-1v-3z" />
-            </svg>
-            Canvas View
-          </button>
-          <button
-            onClick={() => setIsCreateOpen(true)}
-            className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700"
-          >
-            <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-            </svg>
-            Create Task
-          </button>
+    <>
+      {/* Grid Header - Search, Canvas View, Create Task */}
+      <GridHeader 
+        searchValue={searchValue}
+        onSearchChange={setSearchValue}
+        onCreateClick={() => setIsCreateOpen(true)}
+      />
+      
+      <div className="overflow-hidden rounded-xl bg-white shadow-lg">
+        {/* Header */}
+        <div className="border-b border-gray-200 px-6 py-4">
+          <h2 className="text-lg font-semibold text-gray-800">Tasks</h2>
         </div>
-      </div>
 
       {/* Filter */}
       <TasksFilter filters={filters} onChange={setFilters} />
@@ -306,6 +296,7 @@ export default function TasksGrid({ filter }) {
         onClose={() => setIsCreateOpen(false)}
         onSuccess={() => setIsCreateOpen(false)}
       />
-    </div>
+      </div>
+    </>
   );
 }
