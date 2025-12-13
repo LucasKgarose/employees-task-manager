@@ -2,8 +2,13 @@ import React from 'react';
 import { useTaskForm } from '../hooks/useTaskForm';
 
 export default function TaskForm({ initialTask, onSuccess }) {
-  const { form, handleChange, handleSubmit, submitting, error } =
-    useTaskForm(initialTask);
+  const {
+    form,
+    handleChange,
+    handleSubmit,
+    submitting,
+    error
+  } = useTaskForm(initialTask);
 
   return (
     <form
@@ -166,7 +171,7 @@ export default function TaskForm({ initialTask, onSuccess }) {
       <div className="flex justify-end">
         <button
           type="submit"
-          disabled={submitting}
+        //   disabled={submitting}
           className="rounded-lg bg-blue-600 px-6 py-2 text-sm font-medium text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {submitting ? 'Saving...' : 'Save Task'}
