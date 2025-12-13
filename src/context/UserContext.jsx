@@ -1,6 +1,9 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { auth } from '../firebase';
-import { onAuthStateChanged } from 'firebase/auth';
+import {
+  onAuthStateChanged,
+  signOut
+} from 'firebase/auth';
 
 const UserContext = createContext();
 
@@ -19,10 +22,22 @@ export function UserProvider({ children }) {
     return unsubscribe;
   }, []);
 
+  const logout = async () => {
+    try {
+      await signOut(auth);
+      setCurrentUser(null);
+      setIsAuthenticated(false);
+    } catch (error) {
+      console.error('Logout error:', error);
+      throw error;
+    }
+  };
+
   const value = {
     currentUser,
     isAuthenticated,
     loading,
+    logout,
   };
 
   return (
