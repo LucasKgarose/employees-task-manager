@@ -181,6 +181,28 @@ export default function TaskEditForm({ task, isOpen, onClose, onSuccess }) {
             </div>
           )}
 
+          {/* Timestamps - only show in edit mode */}
+          {task?.id && (task.createdAt || task.updatedAt) && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-gray-200">
+              {task.createdAt && (
+                <div>
+                  <label className="block text-xs font-medium text-gray-500 mb-1">Created At</label>
+                  <p className="text-sm text-gray-700">
+                    {new Date(task.createdAt).toLocaleString()}
+                  </p>
+                </div>
+              )}
+              {task.updatedAt && (
+                <div>
+                  <label className="block text-xs font-medium text-gray-500 mb-1">Last Updated</label>
+                  <p className="text-sm text-gray-700">
+                    {new Date(task.updatedAt).toLocaleString()}
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
+
           {/* Footer Buttons */}
           <div className="flex justify-end gap-3 pt-4 border-t border-gray-200">
             <button

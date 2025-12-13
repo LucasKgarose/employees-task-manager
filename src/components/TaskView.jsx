@@ -142,16 +142,16 @@ export default function TaskView({ task, isOpen, onClose }) {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-gray-200">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Created At</label>
-              {/* <p className="text-sm text-gray-500">
+              <p className="text-sm text-gray-500">
                 {task.createdAt ? new Date(task.createdAt).toLocaleString() : 'Unknown'}
-              </p> */}
+              </p>
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Last Updated</label>
-              {/* <p className="text-sm text-gray-500">
+              <p className="text-sm text-gray-500">
                 {task.updatedAt ? new Date(task.updatedAt).toLocaleString() : 'Unknown'}
-              </p> */}
+              </p>
             </div>
           </div>
         </div>

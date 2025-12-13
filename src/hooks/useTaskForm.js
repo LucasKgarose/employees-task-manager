@@ -29,10 +29,11 @@ export function useTaskForm(initialTask = null) {
     setSubmitting(true);
     setError(null);
     try {
+      const now = new Date().toISOString();
       if (form.id) {
-        await updateTask(form.id, form);
+        await updateTask(form.id, { ...form, updatedAt: now });
       } else {
-        await addTask(form);
+        await addTask({ ...form, createdAt: now, updatedAt: now });
       }
       setForm(initialTask || {
         title: '', description: '', dueDate: '', status: 'pending', assignee: '', reviewer: '', estimateHours: '', actualHours: '', notes: '',
