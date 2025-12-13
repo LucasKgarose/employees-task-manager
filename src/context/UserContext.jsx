@@ -4,6 +4,7 @@ import {
   onAuthStateChanged,
   signOut
 } from 'firebase/auth';
+import { getUserProfile } from '../utils/userManagement';
 
 const UserContext = createContext();
 
@@ -15,15 +16,27 @@ export function UserProvider({ children }) {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
-        // Fetch user role from Firestore
-        // For now, we'll use a default role or extract from user metadata
-        // In production, fetch from Firestore users collection
-        const userWithRole = {
-          ...user,
-          role: user.role || 'employee', // Default role
-          displayName: user.displayName || user.email,
-        };
-        setCurrentUser(userWithRole);
+        try {
+          // Fetch user profile from Firestore to get role
+          const userProfile = await getUserProfile(user.uid);
+          
+          const userWithRole = {
+            ...user,
+            role: userProfile?.role || 'employee', // Default to 'employee' if no role set
+            displayName: user.displayName || userProfile?.fullName || user.email,
+            fullName: userProfile?.fullName || user.displayName,
+          };
+          setCurrentUser(userWithRole);
+        } catch (error) {
+          console.error('Error fetching user profile:', error);
+          // Fallback if Firestore fetch fails
+          const userWithRole = {
+            ...user,
+            role: 'employee',
+            displayName: user.displayName || user.email,
+          };
+          setCurrentUser(userWithRole);
+        }
       } else {
         setCurrentUser(null);
       }

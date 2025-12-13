@@ -1,13 +1,14 @@
 import { useState } from 'react';
-import { auth, db } from '../firebase';
+import { auth } from '../firebase';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
-import { doc, setDoc } from 'firebase/firestore';
+import { createUserProfile } from '../utils/userManagement';
 
 export function useRegister() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [fullName, setFullName] = useState('');
+  const [role, setRole] = useState('employee'); // Default role
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
@@ -56,13 +57,12 @@ export function useRegister() {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
 
-      // Store user data in Firestore
-      await setDoc(doc(db, 'users', user.uid), {
+      // Store user data in Firestore with role
+      await createUserProfile(user.uid, {
         uid: user.uid,
         fullName: fullName.trim(),
         email: email.toLowerCase(),
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
+        role: role, // Store the selected role
       });
 
       setSuccess(true);
@@ -70,6 +70,7 @@ export function useRegister() {
       setPassword('');
       setConfirmPassword('');
       setFullName('');
+      setRole('employee');
     } catch (err) {
       if (err.code === 'auth/email-already-in-use') {
         setError('Email is already registered');
@@ -89,6 +90,7 @@ export function useRegister() {
     password,
     confirmPassword,
     fullName,
+    role,
     loading,
     error,
     success,
@@ -97,6 +99,7 @@ export function useRegister() {
     setPassword,
     setConfirmPassword,
     setFullName,
+    setRole,
     register,
   };
 }

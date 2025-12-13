@@ -2,6 +2,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 import CenteredFormLayout from "../components/CenteredFormLayout";
 import { useRegister } from "../hooks/useRegister";
+import { ROLES } from "../models";
 
 export default function Register() {
   const {
@@ -9,6 +10,7 @@ export default function Register() {
     password,
     confirmPassword,
     fullName,
+    role,
     loading,
     error,
     success,
@@ -16,6 +18,7 @@ export default function Register() {
     setPassword,
     setConfirmPassword,
     setFullName,
+    setRole,
     register,
   } = useRegister();
 
@@ -66,6 +69,29 @@ export default function Register() {
             placeholder="Enter your email"
             disabled={loading}
           />
+        </div>
+
+        {/* Role Selector */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Role
+          </label>
+          <select
+            value={role}
+            onChange={(e) => setRole(e.target.value)}
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            disabled={loading}
+          >
+            <option value={ROLES.EMPLOYEE}>Employee</option>
+            <option value={ROLES.DEBT_COLLECTOR}>Debt Collector</option>
+            <option value={ROLES.CANDIDATE_ATTORNEY}>Candidate Attorney</option>
+            <option value={ROLES.ATTORNEY}>Attorney</option>
+            <option value={ROLES.OFFICE_MANAGER}>Office Manager</option>
+            <option value={ROLES.MANAGER}>Manager</option>
+            <option value={ROLES.CONSULTING_MANAGER}>Consulting Manager</option>
+            <option value={ROLES.LEGAL_MANAGER}>Legal Manager</option>
+            <option value={ROLES.ORG_ADMIN}>Org Admin</option>
+          </select>
         </div>
 
         {/* Password */}
