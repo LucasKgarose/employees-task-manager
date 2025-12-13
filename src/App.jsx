@@ -10,7 +10,8 @@ import {
   Login,
   Register,
   OTP,
-  ForgotPassword
+  ForgotPassword,
+  TaskCanvasPage
 } from './pages';
 import ProtectedRoute from './components/ProtectedRoute';
 import PublicRoute from './components/PublicRoute';
@@ -25,6 +26,7 @@ function App() {
         <Route path="/otp" element={<OTP />} />
         <Route path="/forgot-password" element={<PublicRoute><ForgotPassword /></PublicRoute>} />
         <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+        <Route path="/tasks/canvas" element={<ProtectedRoute><TaskCanvasPage /></ProtectedRoute>} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Router>
