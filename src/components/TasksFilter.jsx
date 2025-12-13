@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 
-export default function TasksFilter({ filters, onChange }) {
+export default function TasksFilter({ filters, onChange, employees = [] }) {
   const [showFilters, setShowFilters] = useState(false);
 
   const priorities = [
@@ -34,6 +34,14 @@ export default function TasksFilter({ filters, onChange }) {
     onChange({ ...filters, status: newStatuses });
   };
 
+  const handleAssigneeChange = (value) => {
+    const currentAssignees = filters.assignee || [];
+    const newAssignees = currentAssignees.includes(value)
+      ? currentAssignees.filter(a => a !== value)
+      : [...currentAssignees, value];
+    onChange({ ...filters, assignee: newAssignees });
+  };
+
   return (
     <div className="bg-gray-50 border-b border-gray-200">
       <div className="flex gap-4 p-4">
@@ -46,9 +54,9 @@ export default function TasksFilter({ filters, onChange }) {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
           </svg>
           Filters
-          {((filters.priority && filters.priority.length > 0) || (filters.status && filters.status.length > 0)) && (
+          {((filters.priority && filters.priority.length > 0) || (filters.status && filters.status.length > 0) || (filters.assignee && filters.assignee.length > 0)) && (
             <span className="inline-flex items-center justify-center w-5 h-5 text-xs font-semibold text-white bg-blue-600 rounded-full">
-              {(filters.priority?.length || 0) + (filters.status?.length || 0)}
+              {(filters.priority?.length || 0) + (filters.status?.length || 0) + (filters.assignee?.length || 0)}
             </span>
           )}
         </button>
@@ -57,7 +65,7 @@ export default function TasksFilter({ filters, onChange }) {
       {/* Collapsible Filters */}
       {showFilters && (
         <div className="px-4 pb-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {/* Priority Filter Cards */}
             <div>
               <h3 className="text-xs font-semibold text-gray-700 mb-2">Priority</h3>
@@ -107,13 +115,42 @@ export default function TasksFilter({ filters, onChange }) {
                 ))}
               </div>
             </div>
+
+            {/* Assignee Filter Cards */}
+            <div>
+              <h3 className="text-xs font-semibold text-gray-700 mb-2">Assignee</h3>
+              <div className="flex flex-wrap gap-2">
+                {employees.length > 0 ? (
+                  employees.map((employee) => (
+                    <label
+                      key={employee}
+                      className={`inline-flex items-center gap-2 px-3 py-2 rounded-lg border-2 cursor-pointer transition ${
+                        (filters.assignee || []).includes(employee)
+                          ? "border-blue-500 bg-blue-50"
+                          : "border-gray-200 bg-white hover:border-gray-300"
+                      }`}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={(filters.assignee || []).includes(employee)}
+                        onChange={() => handleAssigneeChange(employee)}
+                        className="w-3.5 h-3.5 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                      />
+                      <span className="text-xs font-medium text-gray-700 whitespace-nowrap">{employee}</span>
+                    </label>
+                  ))
+                ) : (
+                  <p className="text-xs text-gray-500">No employees found</p>
+                )}
+              </div>
+            </div>
           </div>
 
           {/* Clear Filters Button */}
-          {((filters.priority && filters.priority.length > 0) || (filters.status && filters.status.length > 0)) && (
+          {((filters.priority && filters.priority.length > 0) || (filters.status && filters.status.length > 0) || (filters.assignee && filters.assignee.length > 0)) && (
             <div className="pt-3">
               <button
-                onClick={() => onChange({ priority: [], status: [] })}
+                onClick={() => onChange({ priority: [], status: [], assignee: [] })}
                 className="text-xs text-blue-600 hover:text-blue-700 font-medium"
               >
                 Clear all filters

@@ -13,8 +13,20 @@ export function UserProvider({ children }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setCurrentUser(user);
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        // Fetch user role from Firestore
+        // For now, we'll use a default role or extract from user metadata
+        // In production, fetch from Firestore users collection
+        const userWithRole = {
+          ...user,
+          role: user.role || 'employee', // Default role
+          displayName: user.displayName || user.email,
+        };
+        setCurrentUser(userWithRole);
+      } else {
+        setCurrentUser(null);
+      }
       setIsAuthenticated(!!user);
       setLoading(false);
     });

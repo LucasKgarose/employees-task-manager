@@ -14,10 +14,21 @@ export default function TasksGrid({ filter }) {
   const { tasks, loading, error } = useTasksGrid(filter);
   const { selectedTask, isViewOpen, openTaskView, closeTaskView } = useTaskView();
   const [searchValue, setSearchValue] = useState("");
-  const [filters, setFilters] = useState({ priority: [], status: [] });
+  const [filters, setFilters] = useState({ priority: [], status: [], assignee: [] });
   const [editTask, setEditTask] = useState(null);
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
+
+  // Extract unique employees from tasks
+  const employees = useMemo(() => {
+    const uniqueEmployees = new Set();
+    tasks.forEach(task => {
+      if (task.assignee) {
+        uniqueEmployees.add(task.assignee?.name || task.assignee);
+      }
+    });
+    return Array.from(uniqueEmployees).sort();
+  }, [tasks]);
 
   // Local filtering
   const filteredTasks = useMemo(() => {
@@ -27,7 +38,8 @@ export default function TasksGrid({ filter }) {
         (task.assignee?.name || task.assignee || "").toLowerCase().includes(searchValue.toLowerCase());
       const priorityMatch = !filters.priority || filters.priority.length === 0 || filters.priority.includes(String(task.priority || 3));
       const statusMatch = !filters.status || filters.status.length === 0 || filters.status.includes(String(task.status));
-      return searchMatch && priorityMatch && statusMatch;
+      const assigneeMatch = !filters.assignee || filters.assignee.length === 0 || filters.assignee.includes(task.assignee?.name || task.assignee);
+      return searchMatch && priorityMatch && statusMatch && assigneeMatch;
     });
   }, [tasks, searchValue, filters]);
 
@@ -63,7 +75,7 @@ export default function TasksGrid({ filter }) {
         </div>
 
       {/* Filter */}
-      <TasksFilter filters={filters} onChange={setFilters} />
+      <TasksFilter filters={filters} onChange={setFilters} employees={employees} />
 
       {/* Table wrapper for horizontal scroll */}
       <div className="overflow-x-auto">

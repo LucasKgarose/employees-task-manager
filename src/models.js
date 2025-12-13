@@ -40,11 +40,21 @@ export const exampleTask = {
 export const exampleTimesheet = {
   id: 'timesheet_001',
   employee: exampleUser, // or user id reference
-  weekStart: '2025-12-08',
-  weekEnd: '2025-12-14',
+  weekStart: '2025-12-08', // Monday
+  weekEnd: '2025-12-14', // Sunday
   tasks: [exampleTask], // array of task objects or ids
+  lunchHours: 5, // Total lunch hours for the week
   comments: 'Good progress this week',
   approved: false,
   approvedBy: null, // user object or id
   approvedAt: null, // date string
+};
+
+// Organization object example (Phase 2)
+export const exampleOrganization = {
+  id: 'org_001',
+  name: 'ABC Law Firm',
+  requiredWeeklyHours: 45, // Configurable by org admin
+  admins: ['user_id_1', 'user_id_2'],
+  createdAt: '2025-12-01T10:00:00Z',
 };

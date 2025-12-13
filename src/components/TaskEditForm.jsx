@@ -1,7 +1,10 @@
 import React from 'react';
 import { useTaskForm } from '../hooks/useTaskForm';
+import { useUser } from '../context/UserContext';
+import { canCreateTaskFor } from '../utils/rolePermissions';
 
 export default function TaskEditForm({ task, isOpen, onClose, onSuccess }) {
+  const { currentUser } = useUser();
   const { form, handleChange, handleSubmit, submitting, error } = useTaskForm(task);
 
   if (!isOpen) return null;
