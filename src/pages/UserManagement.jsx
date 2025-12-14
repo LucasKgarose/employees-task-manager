@@ -8,6 +8,7 @@ import { ROLES } from '../models';
 import DashboardLayout from '../components/DashboardLayout';
 import { useToast } from '../hooks/useToast';
 import Toast from '../components/Toast';
+import Loader from '../components/Loader';
 
 export default function UserManagement() {
   const [users, setUsers] = useState([]);
@@ -129,9 +130,7 @@ export default function UserManagement() {
   if (loading) {
     return (
       <DashboardLayout>
-        <div className="flex items-center justify-center h-full">
-          <p className="text-gray-500">Loading users...</p>
-        </div>
+        <Loader message="Loading users" />
       </DashboardLayout>
     );
   }

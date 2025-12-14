@@ -6,6 +6,7 @@ import { canViewTasksFor } from '../utils/rolePermissions';
 import { useConfirmationModal } from '../hooks/useConfirmationModal';
 import DashboardLayout from '../components/DashboardLayout';
 import ConfirmationModal from '../components/ConfirmationModal';
+import Loader from '../components/Loader';
 
 export default function TimesheetsView() {
   const { currentUser } = useUser();
@@ -135,9 +136,7 @@ export default function TimesheetsView() {
   if (loading) {
     return (
       <DashboardLayout>
-        <div className="flex items-center justify-center h-full">
-          <p className="text-gray-500">Loading timesheets...</p>
-        </div>
+        <Loader message="Loading timesheets" />
       </DashboardLayout>
     );
   }

@@ -6,6 +6,7 @@ import DeleteOutlineOutlinedIcon from "@mui/icons-material/DeleteOutlineOutlined
 import { useUser } from "../context/UserContext";
 import { useToast } from "../hooks/useToast";
 import Toast from "../components/Toast";
+import Loader from "../components/Loader";
 import DashboardLayout from "../components/DashboardLayout";
 import {
   createInvitation,
@@ -150,8 +151,8 @@ export default function InvitationManager() {
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan="5" className="py-16 text-center text-gray-500">
-                    Loading invitations…
+                  <td colSpan="5">
+                    <Loader message="Loading invitations" size="md" />
                   </td>
                 </tr>
               ) : invitations.length === 0 ? (
