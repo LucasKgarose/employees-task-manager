@@ -5,4 +5,5 @@ export { default as ForgotPassword } from './ForgotPassword'
 export { default as Dashboard } from './Dashboard'
 export { default as TaskCanvasPage } from './TaskCanvasPage';
 export { default as TimesheetPage } from './TimesheetPage';
+export { default as TimesheetsView } from './TimesheetsView';
 export { default as UserManagement } from './UserManagement';

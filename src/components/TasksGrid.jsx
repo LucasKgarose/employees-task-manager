@@ -3,6 +3,7 @@ import React, { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTasksGrid } from "../hooks/useTasksGrid";
 import { useTaskView } from "../hooks/useTaskView";
+import { useFirebaseTasks } from "../hooks/useFirebaseTasks";
 import GridHeader from "./GridHeader";
 import TasksFilter from "./TasksFilter";
 import TaskView from "./TaskView";
@@ -12,12 +13,19 @@ import TaskEditForm from "./TaskEditForm";
 export default function TasksGrid({ filter }) {
   const navigate = useNavigate();
   const { tasks, loading, error } = useTasksGrid(filter);
+  const { updateTask } = useFirebaseTasks();
   const { selectedTask, isViewOpen, openTaskView, closeTaskView } = useTaskView();
   const [searchValue, setSearchValue] = useState("");
   const [filters, setFilters] = useState({ priority: [], status: [], assignee: [] });
   const [editTask, setEditTask] = useState(null);
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
+
+  const handleStartTask = async (task) => {
+    if (task.status === 'todo' || task.status === 'pending') {
+      await updateTask(task.id, { status: 'in-progress' });
+    }
+  };
 
   // Extract unique employees from tasks
   const employees = useMemo(() => {
@@ -189,6 +197,15 @@ export default function TasksGrid({ filter }) {
 
                 <td className="px-4 py-3">
                   <div className="flex items-center gap-2">
+                    {(task.status === 'todo' || task.status === 'pending') && (
+                      <button
+                        onClick={() => handleStartTask(task)}
+                        className="rounded bg-green-600 px-3 py-1 text-xs font-medium text-white hover:bg-green-700 transition"
+                        title="Start Task"
+                      >
+                        Start
+                      </button>
+                    )}
                     <button
                       onClick={() => openTaskView(task)}
                       className="rounded p-1 text-blue-600 hover:bg-blue-50"

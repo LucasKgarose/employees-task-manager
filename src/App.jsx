@@ -13,6 +13,7 @@ import {
   ForgotPassword,
   TaskCanvasPage,
   TimesheetPage,
+  TimesheetsView,
   UserManagement
 } from './pages';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -30,6 +31,7 @@ function App() {
         <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
         <Route path="/tasks/canvas" element={<ProtectedRoute><TaskCanvasPage /></ProtectedRoute>} />
         <Route path="/timesheet" element={<ProtectedRoute><TimesheetPage /></ProtectedRoute>} />
+        <Route path="/timesheets" element={<ProtectedRoute><TimesheetsView /></ProtectedRoute>} />
         <Route path="/users" element={<ProtectedRoute><UserManagement /></ProtectedRoute>} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

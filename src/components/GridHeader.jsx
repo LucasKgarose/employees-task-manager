@@ -1,12 +1,16 @@
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useUser } from '../context/UserContext';
+import React from "react";
+import { useNavigate } from "react-router-dom";
+import { useUser } from "../context/UserContext";
 
-export default function GridHeader({ searchValue, onSearchChange, onCreateClick }) {
+export default function GridHeader({
+  searchValue,
+  onSearchChange,
+  onCreateClick,
+}) {
   const navigate = useNavigate();
   const { currentUser } = useUser();
-  
-  const isAdmin = currentUser?.role === 'org_admin';
+
+  const isAdmin = currentUser?.role === "org_admin";
 
   return (
     <div className="mb-6">
@@ -22,7 +26,7 @@ export default function GridHeader({ searchValue, onSearchChange, onCreateClick 
         
         {/* Buttons Group */}
         <div className="flex gap-3">
-          {isAdmin && (
+          {/* {isAdmin && (
             <button
               onClick={() => navigate('/users')}
               className="flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium text-gray-700 bg-white rounded-lg border border-gray-300 hover:bg-gray-50 flex-1 lg:flex-initial"
@@ -33,8 +37,8 @@ export default function GridHeader({ searchValue, onSearchChange, onCreateClick 
               <span className="hidden sm:inline">Manage Users</span>
               <span className="sm:hidden">Users</span>
             </button>
-          )}
-          <button
+          )} */}
+          {/* <button
             onClick={() => navigate('/timesheet')}
             className="flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium text-gray-700 bg-white rounded-lg border border-gray-300 hover:bg-gray-50 flex-1 lg:flex-initial"
           >
@@ -43,8 +47,8 @@ export default function GridHeader({ searchValue, onSearchChange, onCreateClick 
             </svg>
             <span className="hidden sm:inline">My Timesheet</span>
             <span className="sm:hidden">Timesheet</span>
-          </button>
-          <button
+          </button> */}
+          {/* <button
             onClick={() => navigate('/tasks/canvas')}
             className="flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium text-gray-700 bg-white rounded-lg border border-gray-300 hover:bg-gray-50 flex-1 lg:flex-initial"
           >
@@ -53,13 +57,23 @@ export default function GridHeader({ searchValue, onSearchChange, onCreateClick 
             </svg>
             <span className="hidden sm:inline">Canvas View</span>
             <span className="sm:hidden">Canvas</span>
-          </button>
+          </button> */}
           <button
             onClick={onCreateClick}
             className="flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 flex-1 lg:flex-initial"
           >
-            <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+            <svg
+              className="h-5 w-5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 4v16m8-8H4"
+              />
             </svg>
             <span className="hidden sm:inline">Create Task</span>
             <span className="sm:hidden">Create</span>

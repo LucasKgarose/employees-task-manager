@@ -9,6 +9,11 @@ export default function Sidebar() {
   const [isCollapsed, setIsCollapsed] = useState(false);
 
   const isAdmin = currentUser?.role === 'org_admin';
+  const canViewAllTimesheets = currentUser?.role === 'org_admin' || 
+                               currentUser?.role === 'manager' ||
+                               currentUser?.role === 'legal_manager' ||
+                               currentUser?.role === 'consulting_manager' ||
+                               currentUser?.role === 'office_manager';
   const isActive = (path) => location.pathname === path;
 
   const menuItems = [
@@ -23,7 +28,7 @@ export default function Sidebar() {
       show: true,
     },
     {
-      name: 'My Timesheet',
+      name: 'Timesheet Entry',
       path: '/timesheet',
       icon: (
         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -31,6 +36,17 @@ export default function Sidebar() {
         </svg>
       ),
       show: true,
+    },
+    {
+      name: 'All Timesheets',
+      path: '/timesheets',
+      icon: (
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+        </svg>
+      ),
+      show: canViewAllTimesheets,
+      badge: 'Manager',
     },
     {
       name: 'Canvas View',
