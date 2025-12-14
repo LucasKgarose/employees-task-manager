@@ -1,11 +1,38 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useTaskForm } from '../hooks/useTaskForm';
 import { useUser } from '../context/UserContext';
 import { canCreateTaskFor } from '../utils/rolePermissions';
 
 export default function TaskEditForm({ task, isOpen, onClose, onSuccess }) {
   const { currentUser } = useUser();
-  const { form, handleChange, handleSubmit, submitting, error } = useTaskForm(task);
+  const {
+    form,
+    setForm,
+    handleChange,
+    handleSubmit,
+    submitting,
+    error
+  } = useTaskForm(task);
+
+  // Update form when task prop changes
+  useEffect(() => {
+    if (task && isOpen) {
+      setForm(task);
+    } else if (!task && isOpen) {
+      setForm({
+        title: '',
+        description: '',
+        dueDate: '',
+        status: 'pending',
+        assignee: '',
+        reviewer: '',
+        priority: 3,
+        estimateHours: '',
+        actualHours: '',
+        notes: '',
+      });
+    }
+  }, [task, isOpen, setForm]);
 
   if (!isOpen) return null;
 

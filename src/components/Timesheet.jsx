@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useTimesheet, getCurrentWeekStart } from '../hooks/useTimesheet';
 import { useUser } from '../context/UserContext';
 import { canApproveTimesheets } from '../utils/rolePermissions';
+import WeeklyTaskForm from './WeeklyTaskForm';
 
 export default function Timesheet({ employeeId, employeeName, isOwnTimesheet = true }) {
   const { currentUser } = useUser();
@@ -10,6 +11,7 @@ export default function Timesheet({ employeeId, employeeName, isOwnTimesheet = t
   const [comments, setComments] = useState(timesheet?.comments || '');
   const [lunchHours, setLunchHours] = useState(timesheet?.lunchHours || 0);
   const [submitting, setSubmitting] = useState(false);
+  const [showWeeklyTaskForm, setShowWeeklyTaskForm] = useState(false);
 
   // TODO: Phase 2 - fetch from organization settings
   const REQUIRED_WEEKLY_HOURS = 45;
@@ -140,12 +142,35 @@ export default function Timesheet({ employeeId, employeeName, isOwnTimesheet = t
 
       {/* Tasks Table */}
       <div className="p-6">
+        {/* Add Tasks Button */}
+        {isOwnTimesheet && !timesheet?.approved && (
+          <div className="mb-4">
+            <button
+              onClick={() => setShowWeeklyTaskForm(true)}
+              className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 font-medium"
+            >
+              <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              </svg>
+              Add Tasks for This Week
+            </button>
+          </div>
+        )}
+
         {tasks.length === 0 ? (
           <div className="text-center text-gray-500 py-12 bg-gray-50 rounded-lg">
             <svg className="w-16 h-16 mx-auto text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
             </svg>
             <p className="text-lg font-medium">No tasks for this week</p>
+            {isOwnTimesheet && !timesheet?.approved && (
+              <button
+                onClick={() => setShowWeeklyTaskForm(true)}
+                className="mt-4 text-blue-600 hover:text-blue-700 font-medium"
+              >
+                Click here to add tasks
+              </button>
+            )}
           </div>
         ) : (
           <div className="overflow-x-auto">
@@ -304,6 +329,23 @@ export default function Timesheet({ employeeId, employeeName, isOwnTimesheet = t
           </div>
         )}
       </div>
+
+      {/* Weekly Task Form Modal */}
+      {showWeeklyTaskForm && (
+        <WeeklyTaskForm
+          employeeId={employeeId}
+          employeeName={employeeName}
+          weekStart={weekStart}
+          weekEnd={getWeekEnd(weekStart)}
+          onSuccess={(newLunchHours) => {
+            setLunchHours(newLunchHours);
+            setShowWeeklyTaskForm(false);
+            // Refresh the page to show new tasks
+            window.location.reload();
+          }}
+          onClose={() => setShowWeeklyTaskForm(false)}
+        />
+      )}
     </div>
   );
 }
