@@ -6,6 +6,8 @@ import { updateUserRole } from '../utils/userManagement';
 import { createNewUser } from '../utils/createUser';
 import { ROLES } from '../models';
 import DashboardLayout from '../components/DashboardLayout';
+import { useToast } from '../hooks/useToast';
+import Toast from '../components/Toast';
 
 export default function UserManagement() {
   const [users, setUsers] = useState([]);
@@ -13,10 +15,12 @@ export default function UserManagement() {
   const [updating, setUpdating] = useState(null);
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [creating, setCreating] = useState(false);
+  const { toast, showSuccess, showError, hideToast } = useToast();
   const [createForm, setCreateForm] = useState({
     email: '',
     password: '',
     fullName: '',
+    phoneNumber: '',
     role: ROLES.EMPLOYEE
   });
   const [adminCredentials, setAdminCredentials] = useState({
@@ -38,7 +42,7 @@ export default function UserManagement() {
       setUsers(usersData);
     } catch (error) {
       console.error('Error fetching users:', error);
-      alert('Failed to fetch users');
+      showError('Failed to fetch users');
     } finally {
       setLoading(false);
     }
@@ -54,10 +58,10 @@ export default function UserManagement() {
         user.id === userId ? { ...user, role: newRole } : user
       ));
       
-      alert('Role updated successfully!');
+      showSuccess('Role updated successfully!');
     } catch (error) {
       console.error('Error updating role:', error);
-      alert('Failed to update role');
+      showError('Failed to update role');
     } finally {
       setUpdating(null);
     }
@@ -66,8 +70,8 @@ export default function UserManagement() {
   const handleCreateUser = async (e) => {
     e.preventDefault();
     
-    if (!createForm.email || !createForm.password || !createForm.fullName) {
-      alert('Please fill in all fields');
+    if (!createForm.email || !createForm.password || !createForm.fullName || !createForm.phoneNumber) {
+      showError('Please fill in all fields');
       return;
     }
 
@@ -82,6 +86,7 @@ export default function UserManagement() {
         createForm.email,
         createForm.password,
         createForm.fullName,
+        createForm.phoneNumber,
         createForm.role
       );
       
@@ -98,21 +103,22 @@ export default function UserManagement() {
         email: '',
         password: '',
         fullName: '',
+        phoneNumber: '',
         role: ROLES.EMPLOYEE
       });
       setShowCreateForm(false);
       
-      alert('User created successfully! You have been re-authenticated.');
+      showSuccess('User created successfully! You have been re-authenticated.');
     } catch (error) {
       console.error('Error creating user:', error);
-      alert(`Failed to create user: ${error.message}`);
+      showError(`Failed to create user: ${error.message}`);
       
       // Try to re-authenticate admin if something went wrong
       if (adminCredentials.email && adminCredentials.password) {
         try {
           await signInWithEmailAndPassword(auth, adminCredentials.email, adminCredentials.password);
         } catch (reAuthError) {
-          alert('Please log in again as admin');
+          showError(`Please log in again as admin ${reAuthError}`);
         }
       }
     } finally {
@@ -132,6 +138,7 @@ export default function UserManagement() {
 
   return (
     <DashboardLayout>
+      <Toast {...toast} onClose={hideToast} />
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-6 flex items-center justify-between">
@@ -161,6 +168,7 @@ export default function UserManagement() {
                       email: '',
                       password: '',
                       fullName: '',
+                      phoneNumber: '',
                       role: ROLES.EMPLOYEE
                     });
                     setAdminCredentials({
@@ -234,6 +242,18 @@ export default function UserManagement() {
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Phone Number
+                      </label>
+                      <input
+                        type="tel"
+                        value={createForm.phoneNumber}
+                        onChange={(e) => setCreateForm({...createForm, phoneNumber: e.target.value})}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
                         Email
                       </label>
                       <input
@@ -288,6 +308,7 @@ export default function UserManagement() {
                           email: '',
                           password: '',
                           fullName: '',
+                          phoneNumber: '',
                           role: ROLES.EMPLOYEE
                         });
                         setAdminCredentials({

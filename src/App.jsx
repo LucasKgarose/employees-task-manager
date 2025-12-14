@@ -16,6 +16,7 @@ import {
   TimesheetsView,
   UserManagement
 } from './pages';
+import InvitationManager from './pages/InvitationManager';
 import ProtectedRoute from './components/ProtectedRoute';
 import PublicRoute from './components/PublicRoute';
 
@@ -33,6 +34,7 @@ function App() {
         <Route path="/timesheet" element={<ProtectedRoute><TimesheetPage /></ProtectedRoute>} />
         <Route path="/timesheets" element={<ProtectedRoute><TimesheetsView /></ProtectedRoute>} />
         <Route path="/users" element={<ProtectedRoute><UserManagement /></ProtectedRoute>} />
+        <Route path="/invitations" element={<ProtectedRoute><InvitationManager /></ProtectedRoute>} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Router>

@@ -17,7 +17,7 @@ import { doc, setDoc } from 'firebase/firestore';
  *   return { uid: userRecord.uid };
  * });
  */
-export async function createNewUser(email, password, fullName, role) {
+export async function createNewUser(email, password, fullName, phoneNumber, role) {
   try {
     // Create auth user
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
@@ -27,6 +27,7 @@ export async function createNewUser(email, password, fullName, role) {
     await setDoc(doc(db, 'users', user.uid), {
       email,
       fullName,
+      phoneNumber,
       role,
       createdAt: new Date().toISOString(),
     });

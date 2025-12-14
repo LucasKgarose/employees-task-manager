@@ -38,8 +38,12 @@ export function useToast() {
   };
 
   return {
-    isOpen,
-    config,
+    toast: {
+      isOpen,
+      message: config.message,
+      type: config.type,
+      duration: config.duration
+    },
     showToast,
     hideToast,
     showSuccess,
