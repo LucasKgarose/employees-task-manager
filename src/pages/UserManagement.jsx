@@ -3,13 +3,12 @@ import { db } from '../firebase';
 import { collection, getDocs } from 'firebase/firestore';
 import { updateUserRole } from '../utils/userManagement';
 import { ROLES } from '../models';
-import { useNavigate } from 'react-router-dom';
+import DashboardLayout from '../components/DashboardLayout';
 
 export default function UserManagement() {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(null);
-  const navigate = useNavigate();
 
   useEffect(() => {
     fetchUsers();
@@ -52,27 +51,22 @@ export default function UserManagement() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-100 p-6 flex items-center justify-center">
-        <p className="text-gray-500">Loading users...</p>
-      </div>
+      <DashboardLayout>
+        <div className="flex items-center justify-center h-full">
+          <p className="text-gray-500">Loading users...</p>
+        </div>
+      </DashboardLayout>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 p-6">
-      {/* Header */}
-      <div className="mb-6 flex items-center justify-between">
-        <div>
+    <DashboardLayout>
+      <div className="max-w-7xl mx-auto">
+        {/* Header */}
+        <div className="mb-6">
           <h1 className="text-3xl font-bold text-gray-800">User Management</h1>
           <p className="text-gray-600 mt-1">Manage user roles and permissions</p>
         </div>
-        <button
-          onClick={() => navigate('/dashboard')}
-          className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700"
-        >
-          Back to Dashboard
-        </button>
-      </div>
 
       {/* Users Table */}
       <div className="bg-white rounded-xl shadow-lg overflow-hidden">
@@ -148,6 +142,7 @@ export default function UserManagement() {
           <li>• <strong>Employee</strong> - Basic access, can manage own tasks</li>
         </ul>
       </div>
-    </div>
+      </div>
+    </DashboardLayout>
   );
 }
