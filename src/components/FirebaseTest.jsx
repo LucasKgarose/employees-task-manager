@@ -9,7 +9,6 @@ export default function FirebaseTest() {
 
   const addLog = (message) => {
     setLogs((prev) => [...prev, message]);
-    console.log(message);
   };
 
   useEffect(() => {

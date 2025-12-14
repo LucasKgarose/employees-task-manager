@@ -54,9 +54,7 @@ export function useTimesheet(employeeId, weekStart) {
           }))
           .filter(task => {
             // Match assignee - normalize both values for comparison
-            
-            console.log(task, 'logging task');
-            
+                        
             const taskAssignee = (task?.assignee?.name || '').toLowerCase().trim();
             const empId = (employeeId || '').toLowerCase().trim();
             
