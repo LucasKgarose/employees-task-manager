@@ -1,10 +1,14 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useTaskForm } from '../hooks/useTaskForm';
 import { useUser } from '../context/UserContext';
 import { canCreateTaskFor } from '../utils/rolePermissions';
+import { db } from '../firebase';
+import { collection, getDocs } from 'firebase/firestore';
+import UserAutocomplete from './UserAutocomplete';
 
 export default function TaskEditForm({ task, isOpen, onClose, onSuccess }) {
   const { currentUser } = useUser();
+  const [users, setUsers] = useState([]);
   const {
     form,
     setForm,
@@ -13,6 +17,26 @@ export default function TaskEditForm({ task, isOpen, onClose, onSuccess }) {
     submitting,
     error
   } = useTaskForm(task);
+
+  // Fetch users for autocomplete
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const usersSnapshot = await getDocs(collection(db, 'users'));
+        const usersData = usersSnapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }));
+        setUsers(usersData);
+      } catch (error) {
+        console.error('Error fetching users:', error);
+      }
+    };
+
+    if (isOpen) {
+      fetchUsers();
+    }
+  }, [isOpen]);
 
   // Update form when task prop changes
   useEffect(() => {
@@ -122,24 +146,24 @@ export default function TaskEditForm({ task, isOpen, onClose, onSuccess }) {
             {/* Assignee */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Assignee</label>
-              <input
+              <UserAutocomplete
                 name="assignee"
                 value={form.assignee}
                 onChange={handleChange}
-                placeholder="User ID or name"
-                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                options={users}
+                placeholder="Search for a user..."
               />
             </div>
 
             {/* Reviewer */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Reviewer</label>
-              <input
+              <UserAutocomplete
                 name="reviewer"
                 value={form.reviewer}
                 onChange={handleChange}
-                placeholder="User ID or name"
-                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                options={users}
+                placeholder="Search for a reviewer..."
               />
             </div>
 
