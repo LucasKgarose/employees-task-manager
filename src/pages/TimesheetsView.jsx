@@ -3,10 +3,13 @@ import { db } from '../firebase';
 import { collection, getDocs } from 'firebase/firestore';
 import { useUser } from '../context/UserContext';
 import { canViewTasksFor } from '../utils/rolePermissions';
+import { useConfirmationModal } from '../hooks/useConfirmationModal';
 import DashboardLayout from '../components/DashboardLayout';
+import ConfirmationModal from '../components/ConfirmationModal';
 
 export default function TimesheetsView() {
   const { currentUser } = useUser();
+  const { isOpen, config, showConfirmation, hideConfirmation, handleConfirm } = useConfirmationModal();
   const [tasks, setTasks] = useState([]);
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -267,10 +270,17 @@ export default function TimesheetsView() {
                         {!timesheet.isApproved && (
                           <button
                             onClick={() => {
-                              if (window.confirm('Are you sure you want to delete this timesheet? This action cannot be undone.')) {
-                                // TODO: Implement delete functionality
-                                alert('Delete functionality to be implemented');
-                              }
+                              showConfirmation({
+                                title: 'Delete Timesheet',
+                                message: 'Are you sure you want to delete this timesheet? This action cannot be undone.',
+                                confirmText: 'Delete',
+                                cancelText: 'Cancel',
+                                type: 'danger',
+                                onConfirm: () => {
+                                  // TODO: Implement delete functionality
+                                  console.log('Deleting timesheet...');
+                                }
+                              });
                             }}
                             className="rounded p-1 text-red-600 hover:bg-red-50"
                             title="Delete Timesheet"
@@ -334,6 +344,18 @@ export default function TimesheetsView() {
           </div>
         </div>
       </div>
+
+      {/* Confirmation Modal */}
+      <ConfirmationModal
+        isOpen={isOpen}
+        onClose={hideConfirmation}
+        onConfirm={handleConfirm}
+        title={config.title}
+        message={config.message}
+        confirmText={config.confirmText}
+        cancelText={config.cancelText}
+        type={config.type}
+      />
     </DashboardLayout>
   );
 }

@@ -1,11 +1,14 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useUser } from '../context/UserContext';
+import { useConfirmationModal } from '../hooks/useConfirmationModal';
+import ConfirmationModal from './ConfirmationModal';
 
 export default function Sidebar() {
   const navigate = useNavigate();
   const location = useLocation();
   const { currentUser } = useUser();
+  const { isOpen, config, showConfirmation, hideConfirmation, handleConfirm } = useConfirmationModal();
   const [isCollapsed, setIsCollapsed] = useState(false);
 
   const isAdmin = currentUser?.role === 'org_admin';
@@ -160,9 +163,16 @@ export default function Sidebar() {
         <div className="p-4 border-t border-gray-200">
           <button
             onClick={() => {
-              if (window.confirm('Are you sure you want to logout?')) {
-                navigate('/login');
-              }
+              showConfirmation({
+                title: 'Logout',
+                message: 'Are you sure you want to logout?',
+                confirmText: 'Logout',
+                cancelText: 'Cancel',
+                type: 'warning',
+                onConfirm: () => {
+                  navigate('/login');
+                }
+              });
             }}
             className="w-full flex items-center gap-3 px-3 py-3 rounded-lg text-gray-700 hover:bg-red-50 hover:text-red-600 transition-colors"
             title={isCollapsed ? 'Logout' : ''}
@@ -194,6 +204,18 @@ export default function Sidebar() {
             ))}
         </div>
       </div>
+
+      {/* Confirmation Modal */}
+      <ConfirmationModal
+        isOpen={isOpen}
+        onClose={hideConfirmation}
+        onConfirm={handleConfirm}
+        title={config.title}
+        message={config.message}
+        confirmText={config.confirmText}
+        cancelText={config.cancelText}
+        type={config.type}
+      />
     </>
   );
 }
