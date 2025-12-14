@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useUser } from "../context/UserContext";
 import { useToast } from "../hooks/useToast";
 import Toast from "../components/Toast";
+import DashboardLayout from "../components/DashboardLayout";
 import {
   createInvitation,
   getPendingInvitations,
@@ -29,7 +30,9 @@ export default function InvitationManager() {
   const loadInvitations = async () => {
     try {
       setLoading(true);
-      const data = await getPendingInvitations(currentUser?.organizationId || null);
+      const data = await getPendingInvitations(
+        currentUser?.organizationId || null
+      );
       setInvitations(data);
     } catch {
       showError("Failed to load invitations");
@@ -40,70 +43,26 @@ export default function InvitationManager() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.email || !formData.role) {
-      showError("Please fill in all fields");
-      return;
-    }
-
     try {
       setSubmitting(true);
       const invitation = await createInvitation(
         formData.email,
         formData.role,
-        currentUser.organizationId || null,
+        currentUser.organizationId,
         currentUser.uid
       );
 
       await navigator.clipboard.writeText(invitation.invitationLink);
-      showSuccess("Invitation created & link copied!");
+      showSuccess("Invitation created and link copied");
 
       setFormData({ email: "", role: "employee" });
       setIsModalOpen(false);
       loadInvitations();
-    } catch (error) {
-      showError(error.message || "Failed to create invitation");
+    } catch (err) {
+      showError(err.message || "Failed to create invitation");
     } finally {
       setSubmitting(false);
     }
-  };
-
-  const handleCopyLink = async (token) => {
-    try {
-      await navigator.clipboard.writeText(
-        `${window.location.origin}/register?token=${token}`
-      );
-      showSuccess("Link copied to clipboard");
-    } catch {
-      showError("Failed to copy link");
-    }
-  };
-
-  const handleResend = async (id) => {
-    try {
-      const res = await resendInvitation(id);
-      await navigator.clipboard.writeText(res.invitationLink);
-      showSuccess("New invitation link copied");
-      loadInvitations();
-    } catch {
-      showError("Failed to resend invitation");
-    }
-  };
-
-  const handleRevoke = async (id) => {
-    if (!window.confirm("Revoke this invitation?")) return;
-    try {
-      await revokeInvitation(id);
-      showSuccess("Invitation revoked");
-      loadInvitations();
-    } catch {
-      showError("Failed to revoke invitation");
-    }
-  };
-
-  const roleStyles = {
-    org_admin: "bg-red-100 text-red-700",
-    manager: "bg-amber-100 text-amber-700",
-    employee: "bg-gray-100 text-gray-700",
   };
 
   const formatDate = (ts) => {
@@ -112,164 +71,171 @@ export default function InvitationManager() {
     return d.toLocaleString();
   };
 
+  const roleBadge = (role) => {
+    const base =
+      "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium";
+    if (role === "org_admin")
+      return `${base} bg-red-50 text-red-700`;
+    if (role === "manager")
+      return `${base} bg-amber-50 text-amber-700`;
+    return `${base} bg-gray-100 text-gray-700`;
+  };
+
   if (currentUser?.role !== "org_admin") {
     return (
-      <div className="flex flex-col items-center justify-center rounded-xl border bg-white py-20 text-center shadow-sm">
-        <h3 className="text-lg font-semibold text-gray-900">
-          Access Restricted
-        </h3>
-        <p className="mt-2 text-sm text-gray-500">
-          Only organization administrators can manage invitations.
-        </p>
-      </div>
+      <DashboardLayout>
+        <div className="flex h-[60vh] items-center justify-center">
+          <div className="max-w-md text-center">
+            <h2 className="text-xl font-semibold text-gray-900">
+              Access restricted
+            </h2>
+            <p className="mt-2 text-sm text-gray-600">
+              Only organization administrators can manage invitations.
+            </p>
+          </div>
+        </div>
+      </DashboardLayout>
     );
   }
 
   return (
-    <div className="space-y-6">
+    <DashboardLayout>
       <Toast {...toast} onClose={hideToast} />
 
-      {/* Header */}
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-        <div>
-          <h2 className="text-2xl font-semibold tracking-tight text-gray-900">
-            User Invitations
-          </h2>
-          <p className="mt-1 text-sm text-gray-500">
-            Invite users and manage pending access
-          </p>
-        </div>
-        <button
-          onClick={() => setIsModalOpen(true)}
-          className="inline-flex items-center rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-blue-700 focus:ring-2 focus:ring-blue-500"
-        >
-          + Invite User
-        </button>
-      </div>
-
-      {/* Card */}
-      <div className="overflow-hidden rounded-xl border bg-white shadow-sm">
-        <div className="border-b bg-gray-50 px-6 py-4 text-sm font-semibold text-gray-900">
-          Pending Invitations
+      <div className="mx-auto max-w-7xl px-6 py-8">
+        {/* Header */}
+        <div className="mb-8 flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-semibold text-gray-900">
+              User invitations
+            </h1>
+            <p className="mt-1 text-sm text-gray-600">
+              Invite users and manage pending access
+            </p>
+          </div>
+          <button
+            onClick={() => setIsModalOpen(true)}
+            className="rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-blue-700"
+          >
+            Invite user
+          </button>
         </div>
 
-        {loading ? (
-          <div className="flex justify-center py-16">
-            <div className="h-8 w-8 animate-spin rounded-full border-4 border-blue-500 border-t-transparent" />
-          </div>
-        ) : invitations.length === 0 ? (
-          <div className="py-20 text-center text-sm text-gray-500">
-            No pending invitations
-          </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y">
-              <thead className="bg-gray-50 text-xs uppercase text-gray-500">
+        {/* Table */}
+        <div className="overflow-hidden rounded-xl border bg-white">
+          <table className="w-full border-collapse">
+            <thead className="bg-gray-50">
+              <tr className="text-left text-xs font-medium uppercase tracking-wide text-gray-500">
+                <th className="px-6 py-3">Email</th>
+                <th className="px-6 py-3">Role</th>
+                <th className="px-6 py-3">Created</th>
+                <th className="px-6 py-3">Expires</th>
+                <th className="px-6 py-3 text-right">Actions</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              {loading ? (
                 <tr>
-                  <th className="px-6 py-3 text-left">Email</th>
-                  <th className="px-6 py-3 text-left">Role</th>
-                  <th className="px-6 py-3 text-left">Created</th>
-                  <th className="px-6 py-3 text-left">Expires</th>
-                  <th className="px-6 py-3 text-right"></th>
+                  <td colSpan="5" className="py-16 text-center text-gray-500">
+                    Loading invitations…
+                  </td>
                 </tr>
-              </thead>
-              <tbody className="divide-y bg-white">
-                {invitations.map((inv) => (
+              ) : invitations.length === 0 ? (
+                <tr>
+                  <td colSpan="5" className="py-20 text-center text-gray-500">
+                    No pending invitations
+                  </td>
+                </tr>
+              ) : (
+                invitations.map((inv) => (
                   <tr key={inv.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 font-medium text-gray-900">
+                    <td className="px-6 py-4 text-sm font-medium text-gray-900">
                       {inv.email}
                     </td>
                     <td className="px-6 py-4">
-                      <span
-                        className={`rounded-full px-2.5 py-1 text-xs font-medium capitalize ${roleStyles[inv.role]}`}
-                      >
+                      <span className={roleBadge(inv.role)}>
                         {inv.role.replace("_", " ")}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-sm text-gray-500">
+                    <td className="px-6 py-4 text-sm text-gray-600">
                       {formatDate(inv.createdAt)}
                     </td>
-                    <td className="px-6 py-4 text-sm text-gray-500">
+                    <td className="px-6 py-4 text-sm text-gray-600">
                       {formatDate(inv.expiresAt)}
                     </td>
-                    <td className="px-6 py-4 text-right space-x-2">
+                    <td className="px-6 py-4 text-right text-sm">
                       <button
-                        onClick={() => handleCopyLink(inv.token)}
-                        className="rounded-md p-2 hover:bg-gray-100"
-                        title="Copy link"
+                        onClick={() => resendInvitation(inv.id)}
+                        className="text-blue-600 hover:text-blue-700"
                       >
-                        📋
+                        Resend
                       </button>
                       <button
-                        onClick={() => handleResend(inv.id)}
-                        className="rounded-md p-2 hover:bg-gray-100"
-                        title="Resend"
+                        onClick={() => revokeInvitation(inv.id)}
+                        className="ml-4 text-red-600 hover:text-red-700"
                       >
-                        🔁
-                      </button>
-                      <button
-                        onClick={() => handleRevoke(inv.id)}
-                        className="rounded-md p-2 text-red-600 hover:bg-red-50"
-                        title="Revoke"
-                      >
-                        🗑
+                        Revoke
                       </button>
                     </td>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
 
       {/* Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
-          <div className="w-full max-w-lg rounded-2xl bg-white shadow-xl">
-            <div className="flex items-center justify-between border-b px-6 py-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+          <div className="w-full max-w-md rounded-xl bg-white shadow-xl">
+            <div className="border-b px-6 py-4">
               <h3 className="text-lg font-semibold text-gray-900">
-                Create Invitation
+                Create invitation
               </h3>
-              <button
-                onClick={() => setIsModalOpen(false)}
-                className="text-gray-400 hover:text-gray-600"
-              >
-                ✕
-              </button>
             </div>
 
             <form onSubmit={handleSubmit}>
-              <div className="space-y-5 px-6 py-6">
-                <input
-                  type="email"
-                  placeholder="user@example.com"
-                  value={formData.email}
-                  onChange={(e) =>
-                    setFormData({ ...formData, email: e.target.value })
-                  }
-                  className="w-full rounded-lg border px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500"
-                  required
-                />
+              <div className="space-y-5 px-6 py-5">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Email
+                  </label>
+                  <input
+                    type="email"
+                    value={formData.email}
+                    onChange={(e) =>
+                      setFormData({ ...formData, email: e.target.value })
+                    }
+                    className="mt-1 w-full rounded-lg border px-3 py-2 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
+                    required
+                  />
+                </div>
 
-                <select
-                  value={formData.role}
-                  onChange={(e) =>
-                    setFormData({ ...formData, role: e.target.value })
-                  }
-                  className="w-full rounded-lg border px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="employee">Employee</option>
-                  <option value="manager">Manager</option>
-                  <option value="org_admin">Organization Admin</option>
-                </select>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Role
+                  </label>
+                  <select
+                    value={formData.role}
+                    onChange={(e) =>
+                      setFormData({ ...formData, role: e.target.value })
+                    }
+                    className="mt-1 w-full rounded-lg border px-3 py-2 text-sm"
+                  >
+                    <option value="employee">Employee</option>
+                    <option value="manager">Manager</option>
+                    <option value="org_admin">Organization admin</option>
+                  </select>
+                </div>
               </div>
 
               <div className="flex justify-end gap-3 border-t px-6 py-4">
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="rounded-lg border px-4 py-2 text-sm"
+                  className="text-sm font-medium text-gray-600 hover:text-gray-800"
                 >
                   Cancel
                 </button>
@@ -278,13 +244,13 @@ export default function InvitationManager() {
                   disabled={submitting}
                   className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
                 >
-                  {submitting ? "Creating..." : "Create & Copy Link"}
+                  Create invitation
                 </button>
               </div>
             </form>
           </div>
         </div>
       )}
-    </div>
+    </DashboardLayout>
   );
 }
