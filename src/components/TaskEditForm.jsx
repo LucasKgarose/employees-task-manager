@@ -121,13 +121,12 @@ export default function TaskEditForm({ task, isOpen, onClose, onSuccess }) {
 
             {/* Assignee */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Assignee *</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Assignee</label>
               <input
                 name="assignee"
                 value={form.assignee}
                 onChange={handleChange}
                 placeholder="User ID or name"
-                required
                 className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>

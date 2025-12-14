@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { useTasksGrid } from "../hooks/useTasksGrid";
 import { useTaskView } from "../hooks/useTaskView";
 import { useFirebaseTasks } from "../hooks/useFirebaseTasks";
+import { useUser } from "../context/UserContext";
 import GridHeader from "./GridHeader";
 import TasksFilter from "./TasksFilter";
 import TaskView from "./TaskView";
@@ -14,6 +15,7 @@ export default function TasksGrid({ filter }) {
   const navigate = useNavigate();
   const { tasks, loading, error } = useTasksGrid(filter);
   const { updateTask } = useFirebaseTasks();
+  const { currentUser } = useUser();
   const { selectedTask, isViewOpen, openTaskView, closeTaskView } = useTaskView();
   const [searchValue, setSearchValue] = useState("");
   const [filters, setFilters] = useState({ priority: [], status: [], assignee: [] });
@@ -23,7 +25,15 @@ export default function TasksGrid({ filter }) {
 
   const handleStartTask = async (task) => {
     if (task.status === 'todo' || task.status === 'pending') {
-      await updateTask(task.id, { status: 'in-progress' });
+      await updateTask(task.id, { 
+        status: 'in-progress',
+        assignee: {
+          id: currentUser.uid,
+          name: currentUser.displayName || currentUser.email,
+          email: currentUser.email
+        },
+        assigneeId: currentUser.uid
+      });
     }
   };
 
@@ -197,7 +207,7 @@ export default function TasksGrid({ filter }) {
 
                 <td className="px-4 py-3">
                   <div className="flex items-center gap-2">
-                    {(task.status === 'todo' || task.status === 'pending') && (
+                    {(task.status === 'created' || task.status === 'pending') && (
                       <button
                         onClick={() => handleStartTask(task)}
                         className="rounded bg-green-600 px-3 py-1 text-xs font-medium text-white hover:bg-green-700 transition"
