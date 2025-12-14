@@ -51,13 +51,8 @@ export default function TimesheetsView() {
   const visibleUsers = useMemo(() => {
     if (!currentUser) return [];
     
-    return users.filter(user => {
-      // Always show current user
-      if (user.id === currentUser.uid) return true;
-      
-      // Check if current user can view this user's tasks
-      return canViewTasksFor(currentUser.role, user.role || 'employee');
-    });
+    // Only show current user's timesheet in this view
+    return users.filter(user => user.id === currentUser.uid);
   }, [users, currentUser]);
 
   // Calculate timesheet data for selected week
@@ -100,6 +95,7 @@ export default function TimesheetsView() {
       const totalHours = totalActualHours + lunchHours;
       const requiredHours = 45;
       const status = totalHours >= requiredHours ? 'Complete' : 'Incomplete';
+      const isApproved = userTasks.some(task => task.status === 'approved');
 
       return {
         userId: user.id,
@@ -113,6 +109,7 @@ export default function TimesheetsView() {
         totalHours,
         requiredHours,
         status,
+        isApproved,
         tasks: userTasks,
       };
     });
@@ -147,8 +144,8 @@ export default function TimesheetsView() {
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-6">
-          <h1 className="text-3xl font-bold text-gray-800">Timesheets Overview</h1>
-          <p className="text-gray-600 mt-1">View and manage team timesheets</p>
+          <h1 className="text-3xl font-bold text-gray-800">My Timesheets</h1>
+          <p className="text-gray-600 mt-1">View and manage your timesheets</p>
         </div>
 
         {/* Week Selector */}
@@ -185,8 +182,7 @@ export default function TimesheetsView() {
             <table className="w-full">
               <thead className="bg-gray-50 border-b border-gray-200">
                 <tr>
-                  <th className="text-left py-4 px-6 text-xs font-semibold text-gray-600 uppercase">Employee</th>
-                  <th className="text-left py-4 px-6 text-xs font-semibold text-gray-600 uppercase">Role</th>
+                  <th className="text-left py-4 px-6 text-xs font-semibold text-gray-600 uppercase">Week Period</th>
                   <th className="text-right py-4 px-6 text-xs font-semibold text-gray-600 uppercase">Tasks</th>
                   <th className="text-right py-4 px-6 text-xs font-semibold text-gray-600 uppercase">Work Hours</th>
                   <th className="text-right py-4 px-6 text-xs font-semibold text-gray-600 uppercase">Lunch Hours</th>
@@ -200,14 +196,9 @@ export default function TimesheetsView() {
                   <tr key={timesheet.userId} className="hover:bg-gray-50">
                     <td className="py-4 px-6">
                       <div>
-                        <p className="font-medium text-gray-900">{timesheet.userName}</p>
-                        <p className="text-xs text-gray-500">{timesheet.userEmail}</p>
+                        <p className="font-medium text-gray-900">{weekRange}</p>
+                        <p className="text-xs text-gray-500">Week starting {new Date(selectedWeek).toLocaleDateString()}</p>
                       </div>
-                    </td>
-                    <td className="py-4 px-6">
-                      <span className="inline-block px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-700">
-                        {timesheet.userRole}
-                      </span>
                     </td>
                     <td className="py-4 px-6 text-right">
                       <span className="text-sm text-gray-900">{timesheet.taskCount}</span>
@@ -232,30 +223,76 @@ export default function TimesheetsView() {
                     </td>
                     <td className="py-4 px-6 text-center">
                       <span className={`inline-block px-3 py-1 text-xs font-medium rounded-full ${
-                        timesheet.status === 'Complete'
+                        timesheet.isApproved
+                          ? 'bg-purple-100 text-purple-700'
+                          : timesheet.status === 'Complete'
                           ? 'bg-green-100 text-green-700'
                           : 'bg-orange-100 text-orange-700'
                       }`}>
-                        {timesheet.status}
+                        {timesheet.isApproved ? 'Approved' : timesheet.status}
                       </span>
                     </td>
-                    <td className="py-4 px-6 text-center">
-                      <button
-                        onClick={() => {
-                          // Navigate to user's timesheet
-                          window.location.href = `/timesheet?user=${timesheet.userId}&week=${selectedWeek}`;
-                        }}
-                        className="text-blue-600 hover:text-blue-800 text-sm font-medium"
-                      >
-                        View Details
-                      </button>
+                    <td className="py-4 px-6">
+                      <div className="flex items-center justify-center gap-2">
+                        {/* View */}
+                        <button
+                          onClick={() => {
+                            window.location.href = `/timesheet?user=${timesheet.userId}&week=${selectedWeek}`;
+                          }}
+                          className="rounded p-1 text-blue-600 hover:bg-blue-50"
+                          title="View Timesheet"
+                        >
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                          </svg>
+                        </button>
+                        
+                        {/* Edit - only if not approved */}
+                        {!timesheet.isApproved && (
+                          <button
+                            onClick={() => {
+                              window.location.href = `/timesheet?user=${timesheet.userId}&week=${selectedWeek}&mode=edit`;
+                            }}
+                            className="rounded p-1 text-gray-600 hover:bg-gray-100"
+                            title="Edit Timesheet"
+                          >
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                            </svg>
+                          </button>
+                        )}
+                        
+                        {/* Delete - only if not approved */}
+                        {!timesheet.isApproved && (
+                          <button
+                            onClick={() => {
+                              if (window.confirm('Are you sure you want to delete this timesheet? This action cannot be undone.')) {
+                                // TODO: Implement delete functionality
+                                alert('Delete functionality to be implemented');
+                              }
+                            }}
+                            className="rounded p-1 text-red-600 hover:bg-red-50"
+                            title="Delete Timesheet"
+                          >
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                          </button>
+                        )}
+                        
+                        {/* Approved indicator */}
+                        {timesheet.isApproved && (
+                          <span className="text-xs text-gray-500 ml-2">Locked</span>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))}
 
                 {timesheetData.length === 0 && (
                   <tr>
-                    <td colSpan={8} className="py-12 text-center text-gray-500">
+                    <td colSpan={7} className="py-12 text-center text-gray-500">
                       No timesheets found for this week
                     </td>
                   </tr>
@@ -266,27 +303,33 @@ export default function TimesheetsView() {
         </div>
 
         {/* Summary Stats */}
-        <div className="mt-6 grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="bg-white rounded-lg shadow p-4">
-            <p className="text-sm text-gray-600">Total Employees</p>
-            <p className="text-2xl font-bold text-gray-900 mt-1">{timesheetData.length}</p>
-          </div>
-          <div className="bg-white rounded-lg shadow p-4">
-            <p className="text-sm text-gray-600">Complete Timesheets</p>
-            <p className="text-2xl font-bold text-green-600 mt-1">
-              {timesheetData.filter(t => t.status === 'Complete').length}
+            <p className="text-sm text-gray-600">Total Tasks This Week</p>
+            <p className="text-2xl font-bold text-gray-900 mt-1">
+              {timesheetData.reduce((sum, t) => sum + t.taskCount, 0)}
             </p>
           </div>
           <div className="bg-white rounded-lg shadow p-4">
-            <p className="text-sm text-gray-600">Incomplete Timesheets</p>
-            <p className="text-2xl font-bold text-orange-600 mt-1">
-              {timesheetData.filter(t => t.status === 'Incomplete').length}
-            </p>
-          </div>
-          <div className="bg-white rounded-lg shadow p-4">
-            <p className="text-sm text-gray-600">Total Hours Logged</p>
+            <p className="text-sm text-gray-600">Hours Logged</p>
             <p className="text-2xl font-bold text-blue-600 mt-1">
               {timesheetData.reduce((sum, t) => sum + t.totalHours, 0)}h
+            </p>
+          </div>
+          <div className="bg-white rounded-lg shadow p-4">
+            <p className="text-sm text-gray-600">Status</p>
+            <p className={`text-2xl font-bold mt-1 ${
+              timesheetData.some(t => t.isApproved) 
+                ? 'text-purple-600' 
+                : timesheetData.some(t => t.status === 'Complete')
+                ? 'text-green-600'
+                : 'text-orange-600'
+            }`}>
+              {timesheetData.some(t => t.isApproved) 
+                ? 'Approved' 
+                : timesheetData.some(t => t.status === 'Complete')
+                ? 'Complete'
+                : 'In Progress'}
             </p>
           </div>
         </div>
