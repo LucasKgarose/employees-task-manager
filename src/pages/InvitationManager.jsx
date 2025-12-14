@@ -1,4 +1,8 @@
 import React, { useState, useEffect } from "react";
+import ContentCopyOutlinedIcon from "@mui/icons-material/ContentCopyOutlined";
+import ReplayOutlinedIcon from "@mui/icons-material/ReplayOutlined";
+import DeleteOutlineOutlinedIcon from "@mui/icons-material/DeleteOutlineOutlined";
+
 import { useUser } from "../context/UserContext";
 import { useToast } from "../hooks/useToast";
 import Toast from "../components/Toast";
@@ -70,6 +74,15 @@ export default function InvitationManager() {
     const d = ts.toDate ? ts.toDate() : new Date(ts);
     return d.toLocaleString();
   };
+  const handleCopyLink = async (token) => {
+    try {
+      const link = `${window.location.origin}/register?token=${token}`;
+      await navigator.clipboard.writeText(link);
+      showSuccess("Invitation link copied to clipboard");
+    } catch (error) {
+      showError(`Failed to copy invitation link: ${error.message}`);
+    }
+  };
 
   const roleBadge = (role) => {
     const base =
@@ -102,13 +115,13 @@ export default function InvitationManager() {
     <DashboardLayout>
       <Toast {...toast} onClose={hideToast} />
 
-      <div className="mx-auto max-w-7xl px-6 py-8">
+      <div className="px-0 lg:px-6">
         {/* Header */}
+        <h1 className="text-4xl mb-4 font-bold text-gray-900">
+          User invitations
+        </h1>
         <div className="mb-8 flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-semibold text-gray-900">
-              User invitations
-            </h1>
             <p className="mt-1 text-sm text-gray-600">
               Invite users and manage pending access
             </p>
@@ -122,7 +135,7 @@ export default function InvitationManager() {
         </div>
 
         {/* Table */}
-        <div className="overflow-hidden rounded-xl border bg-white">
+        <div className="overflow-hidden overflow-x-auto rounded-xl border bg-white">
           <table className="w-full border-collapse">
             <thead className="bg-gray-50">
               <tr className="text-left text-xs font-medium uppercase tracking-wide text-gray-500">
@@ -130,7 +143,7 @@ export default function InvitationManager() {
                 <th className="px-6 py-3">Role</th>
                 <th className="px-6 py-3">Created</th>
                 <th className="px-6 py-3">Expires</th>
-                <th className="px-6 py-3 text-right">Actions</th>
+                <th className="px-6 py-3">Actions</th>
               </tr>
             </thead>
 
@@ -164,19 +177,32 @@ export default function InvitationManager() {
                     <td className="px-6 py-4 text-sm text-gray-600">
                       {formatDate(inv.expiresAt)}
                     </td>
-                    <td className="px-6 py-4 text-right text-sm">
-                      <button
-                        onClick={() => resendInvitation(inv.id)}
-                        className="text-blue-600 hover:text-blue-700"
-                      >
-                        Resend
-                      </button>
-                      <button
-                        onClick={() => revokeInvitation(inv.id)}
-                        className="ml-4 text-red-600 hover:text-red-700"
-                      >
-                        Revoke
-                      </button>
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-2">
+                        {/* Copy link */}
+                        <button
+                          onClick={() => handleCopyLink(inv.token)}
+                          title="Copy invitation link"
+                        >
+                          <ContentCopyOutlinedIcon fontSize="small" />
+                        </button>
+
+                        {/* Resend */}
+                        <button
+                          onClick={() => resendInvitation(inv.id)}
+                          title="Resend invitation"
+                        >
+                          <ReplayOutlinedIcon fontSize="small" />
+                        </button>
+
+                        {/* Revoke */}
+                        <button
+                          onClick={() => revokeInvitation(inv.id)}
+                          title="Revoke invitation"
+                        >
+                          <DeleteOutlineOutlinedIcon fontSize="small" />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))
