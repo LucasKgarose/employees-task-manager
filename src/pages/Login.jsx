@@ -80,9 +80,8 @@ export default function Login() {
       {/* Register Link */}
       <p className="mt-4 text-center text-sm text-gray-600">
         Don't have an account?{" "}
-        <Link to="/register" className="text-blue-600 hover:text-blue-700 font-medium">
-          Register here
-        </Link>
+        <span className="text-gray-500">Contact your organization admin for an invitation</span>
+
       </p>
     </CenteredFormLayout>
   );
